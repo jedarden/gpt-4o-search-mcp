@@ -5,6 +5,7 @@ print("DEBUG: PYTHONPATH =", os.environ.get("PYTHONPATH"))
 # Main entry point for the FastMCP server
 
 from fastmcp import FastMCP
+from fastapi import FastAPI
 from mcp_server.tools import web_search_tool
 
 class ASGIAppWrapper:
@@ -19,6 +20,7 @@ class ASGIAppWrapper:
 
 app = ASGIAppWrapper(
     FastMCP(
+        app=FastAPI(),
         tools=[web_search_tool],
     )
 )

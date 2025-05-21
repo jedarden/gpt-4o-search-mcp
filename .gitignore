@@ -2,3 +2,6 @@
 /.roo
 /.roomodes
 /aigi.md
+# Ignore Python cache directories and bytecode files
+__pycache__/
+*.pyc
