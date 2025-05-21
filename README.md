@@ -1,12 +1,11 @@
 # Project Overview
 
-This project is a Python application with support for Docker deployment and MCP (Model Context Protocol) integration for advanced code workflows. The codebase includes the following main files:
+A Model Context Protocol (MCP) server which makes OpenAI's gpt-4o-search-preview model accessible over MCP. 
 
 - [`app/app.py`](app/app.py): Main application entry point.
 - [`requirements.txt`](requirements.txt): Lists Python dependencies required to run the application.
 - [`dockerfile`](dockerfile): Instructions for building and running the application in a Docker container.
 - [`.env.example`](.env.example): Example environment variables file. Copy this to `.env` and update values as needed.
-- [`.roo/mcp.json`](.roo/mcp.json): MCP configuration file for roo code integration.
 
 ---
 
@@ -52,33 +51,13 @@ Before running the application, set up your environment variables:
 
 ---
 
-# MCP Configuration Example
-
-To enable roo code integration with the MCP, configure the `.roo/mcp.json` file. Below is a sample configuration and explanation of each field:
-
-```json
-{
-  "server_url": "http://localhost:5000",
-  "api_key": "your-mcp-api-key",
-  "project_id": "your-project-id"
-}
-```
-
-- **server_url**: The URL where your MCP server is running.
-- **api_key**: The API key used to authenticate with the MCP server.
-- **project_id**: The identifier for your project within the MCP system.
-
-Update these fields in `.roo/mcp.json` to match your MCP deployment.
-
----
-
 # Example: Using roo code to connect to MCP
 
 Below is an example configuration block for the `gpt-4o-search` MCP service:
 
 ```json
 "gpt-4o-search": {
-  "url": "http://gpt-4o-search-mcp-service.mcp:8000/sse",
+  "url": "http://link-to-where-service-is-hosted:8000/sse",
   "transport": "http",
   "alwaysAllow": [
     "search"
@@ -90,57 +69,24 @@ Below is an example configuration block for the `gpt-4o-search` MCP service:
 ## Python Example: Performing a "search" Operation
 
 The following Python code demonstrates how to use the above configuration to connect to the MCP service and perform a "search" operation using roo code principles. This example uses the `requests` library to send a search request to the MCP endpoint.
-
 ```python
-import requests
-import json
+from mcp import MCPClient
 
-# MCP service configuration for gpt-4o-search
-mcp_config = {
-    "url": "http://link-to-where-service-is-hosted:8000/sse",
-    "transport": "http",
-    "alwaysAllow": ["search"],
-    "timeout": 300
-}
+# Initialize the MCP client for the gpt-4o-search server
+client = MCPClient("http://link-to-where-service-is-hosted:8000/sse")
 
-def mcp_search(query):
-    """
-    Connects to the MCP service and performs a 'search' operation.
-    Args:
-        query (str): The search query string.
-    Returns:
-        dict: The search results from the MCP service.
-    """
-    # Prepare the request payload
-    payload = {
-        "operation": "search",
-        "query": query
-    }
-    # Send the request to the MCP service
-    response = requests.post(
-        mcp_config["url"],
-        data=json.dumps(payload),
-        headers={"Content-Type": "application/json"},
-        timeout=mcp_config["timeout"]
-    )
-    response.raise_for_status()
-    return response.json()
+# Perform a "search" operation
+result = client.tool("search", {"query": "What is Model Context Protocol?"})
 
-# Example usage
-if __name__ == "__main__":
-    result = mcp_search("What is Model Context Protocol?")
-    print("Search result:", result)
-```
-
+print("Search result:", result)
 ### Explanation
 
-- **mcp_config**: Contains the MCP service connection details as shown in the configuration block.
-- **mcp_search(query)**: Defines a function to send a search request to the MCP service. It constructs the payload, sends a POST request, and returns the JSON response.
-- **requests.post(...)**: Sends the search operation to the MCP endpoint using the provided configuration.
-- **Example usage**: Demonstrates how to call the `mcp_search` function and print the result.
+- **MCPClient**: The official `mcp` Python library provides the `MCPClient` class to connect to an MCP server.
+- **client = MCPClient(...)**: Initializes the client with the URL of the gpt-4o-search MCP server.
+- **client.tool("search", {...})**: Performs the "search" operation by specifying the tool name and parameters as a dictionary.
+- **Result**: The result of the search operation is printed.
 
 ---
-
 # Notes
 
 - Only perform the work outlined above and do not deviate from these instructions.
