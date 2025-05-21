@@ -42,7 +42,8 @@ OPENAI_API_KEY=your-openai-api-key-here
 ### 4. Run the server
 
 ```bash
-fastmcp run mcp_server/main.py:mcp --transport streamable-http --host 0.0.0.0
+fastmcp run mcp_server/main.py:mcp --transport streamable-http
+> **Note:** The `--host` option is not supported in the current FastMCP CLI and should be omitted from the `fastmcp run` command.
 ```
 
 The server will be available at `http://localhost:8000`.
@@ -62,7 +63,7 @@ docker run --env-file .env -p 8000:8000 fastmcp-server
 - The `.env` file should be mounted at runtime and not copied into the image.
 - The container entrypoint is set to:
   ```
-  fastmcp run mcp_server/main.py:mcp --transport streamable-http --host 0.0.0.0
+  fastmcp run mcp_server/main.py:mcp --transport streamable-http
   ```
 - The `--transport streamable-http` option is required for modern deployments. SSE is deprecated and not recommended.
 - For advanced deployment options and troubleshooting, see the [official FastMCP deployment documentation](https://gofastmcp.com/deployment/cli).
