@@ -38,5 +38,8 @@ ENV PYTHONUNBUFFERED=1
 # Security: .env file should be mounted at runtime, not copied into the image.
 # Example: docker run --env-file .env ...
 
-# Start the FastMCP server using the official CLI
-CMD ["fastmcp", "run", "mcp_server/main.py:mcp", "--transport", "streamable-http"]
+# Start the server using Python module invocation from the project root.
+# Rationale: Running with 'python -m mcp_server.main' ensures the 'mcp_server' package is importable,
+# as Python will use the current WORKDIR (/app) as the root of the module search path.
+# This avoids "No module named 'mcp_server'" errors caused by incorrect working directory or entrypoint context.
+CMD ["python", "-m", "mcp_server.main"]

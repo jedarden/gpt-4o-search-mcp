@@ -44,6 +44,15 @@ OPENAI_API_KEY=your-openai-api-key-here
 ```bash
 fastmcp run mcp_server/main.py:mcp --transport streamable-http
 > **Note:** The `--host` option is not supported in the current FastMCP CLI and should be omitted from the `fastmcp run` command.
+> **Direct Python Run (for development/debugging):**  
+> If you want to run the server directly (not via the FastMCP CLI), **you must start it from the workspace root using:**  
+> 
+> ```bash
+> python -m mcp_server.main
+> ```
+> 
+> This is required because running `python mcp_server/main.py` sets the module search path to `mcp_server`, not the workspace root, causing import errors like `No module named 'mcp_server'`.  
+> Always use `python -m mcp_server.main` from the root directory to ensure correct package imports.
 ```
 
 The server will be available at `http://localhost:8000`.
