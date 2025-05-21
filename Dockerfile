@@ -39,4 +39,4 @@ ENV PYTHONUNBUFFERED=1
 # Example: docker run --env-file .env ...
 
 # Start the FastMCP server using the official CLI
-CMD ["fastmcp", "run", "mcp_server/main.py:mcp", "--transport", "streamable-http", "--host", "0.0.0.0"]
+CMD ["fastmcp", "run", "mcp_server/main.py:mcp", "--transport", "streamable-http"]
