@@ -1,247 +1,147 @@
-# FastMCP Web Search MCP Server
+# Project Overview
 
-This project implements an MCP server using FastMCP that exposes a web search tool. The tool accepts a search query, calls the OpenAI API (gpt-4o-search-preview model), and returns structured search results. The server is modular, secure, and ready for containerized deployment.
+This project is a Python application with support for Docker deployment and MCP (Model Context Protocol) integration for advanced code workflows. The codebase includes the following main files:
 
-## Features
+- [`app/app.py`](app/app.py): Main application entry point.
+- [`requirements.txt`](requirements.txt): Lists Python dependencies required to run the application.
+- [`dockerfile`](dockerfile): Instructions for building and running the application in a Docker container.
+- [`.env.example`](.env.example): Example environment variables file. Copy this to `.env` and update values as needed.
+- [`.roo/mcp.json`](.roo/mcp.json): MCP configuration file for roo code integration.
 
-- FastMCP-based MCP server
-- Web search tool endpoint (`/tools/web_search_tool`) with streaming support
-- Secure OpenAI API key management (via environment variable)
-- Input validation and robust error handling
-- Modular, async code structure
-- All completions and streaming handled via the OpenAI Python SDK
-- Unit and integration tests with high coverage (≥90%)
-- Dockerized for easy deployment
-- All dependencies are pinned for security and reproducibility
+---
 
-## Setup
+# Deployment Instructions
 
-### 1. Clone the repository
+## 1. Environment Variables
 
-```bash
-git clone <repo-url>
-cd <repo-directory>
-```
+Before running the application, set up your environment variables:
 
-### 2. Install dependencies
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. Edit `.env` and update the values as needed for your environment.
 
-```bash
-pip install -r requirements.txt
-```
+## 2. Deploying with Docker
 
-All dependencies are pinned to secure, compatible versions. Note: `fastmcp` is not a public PyPI package; ensure it is available locally or via your organization.
+1. Build the Docker image:
+   ```bash
+   docker build -t my-python-app -f dockerfile .
+   ```
+2. Run the container:
+   ```bash
+   docker run --env-file .env -p 8000:8000 my-python-app
+   ```
 
-### 3. Configure environment variables
+## 3. Deploying with Python (virtualenv)
 
-Copy `.env.example` to `.env` and set your OpenAI API key:
+1. Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Set environment variables (see `.env.example`).
+4. Run the application:
+   ```bash
+   python app/app.py
+   ```
 
-```
-OPENAI_API_KEY=your-openai-api-key-here
-```
+---
 
-### 4. Run the server
+# MCP Configuration Example
 
-```bash
-fastmcp run mcp_server/main.py:mcp --transport streamable-http
-> **Note:** The `--host` option is not supported in the current FastMCP CLI and should be omitted from the `fastmcp run` command.
-> **Direct Python Run (for development/debugging):**  
-> If you want to run the server directly (not via the FastMCP CLI), **you must start it from the workspace root using:**  
-> 
-> ```bash
-> python -m mcp_server.main
-> ```
-> 
-> This is required because running `python mcp_server/main.py` sets the module search path to `mcp_server`, not the workspace root, causing import errors like `No module named 'mcp_server'`.  
-> Always use `python -m mcp_server.main` from the root directory to ensure correct package imports.
-```
-
-The server will be available at `http://localhost:8000`.
-
-> **Note:** The server must be started using the FastMCP CLI entrypoint as shown above. The `--transport streamable-http` option is the recommended transport for modern deployments. SSE is deprecated and should not be used for new deployments.
-
-## Docker Deployment
-
-### Build and run with Docker
-
-```bash
-docker build -t fastmcp-server .
-docker run --env-file .env -p 8000:8000 fastmcp-server
-```
-
-- The container runs as a non-root user for security.
-- The `.env` file should be mounted at runtime and not copied into the image.
-- The container entrypoint is set to:
-  ```
-  fastmcp run mcp_server/main.py:mcp --transport streamable-http
-  ```
-- The `--transport streamable-http` option is required for modern deployments. SSE is deprecated and not recommended.
-- For advanced deployment options and troubleshooting, see the [official FastMCP deployment documentation](https://gofastmcp.com/deployment/cli).
-
-## Usage
-
-### Web Search Tool Endpoint
-
-- **Endpoint:** `/tools/web_search_tool`
-- **Method:** POST
-- **Request Body:** JSON with `query` field (string, required, max 512 chars)
-
-#### Example Request
+To enable roo code integration with the MCP, configure the `.roo/mcp.json` file. Below is a sample configuration and explanation of each field:
 
 ```json
 {
-  "query": "What is the Model Context Protocol?"
+  "server_url": "http://localhost:5000",
+  "api_key": "your-mcp-api-key",
+  "project_id": "your-project-id"
 }
 ```
 
-#### Example Response (Success)
+- **server_url**: The URL where your MCP server is running.
+- **api_key**: The API key used to authenticate with the MCP server.
+- **project_id**: The identifier for your project within the MCP system.
+
+Update these fields in `.roo/mcp.json` to match your MCP deployment.
+
+---
+
+# Example: Using roo code to connect to MCP
+
+Below is an example configuration block for the `gpt-4o-search` MCP service:
 
 ```json
-{
-  "success": true,
-  "result": "The Model Context Protocol (MCP) is ..."
+"gpt-4o-search": {
+  "url": "http://gpt-4o-search-mcp-service.mcp:8000/sse",
+  "transport": "http",
+  "alwaysAllow": [
+    "search"
+  ],
+  "timeout": 300
 }
 ```
 
-#### Example Response (Error)
+## Python Example: Performing a "search" Operation
 
-```json
-{
-  "success": false,
-  "error": "Query cannot be empty."
-}
-```
-
-### Streaming Support
-
-The web search tool endpoint supports streaming responses using the `streamable-http` transport. To use streaming, set the `Accept: text/event-stream` header in your request. The server will stream partial results as they are generated by the OpenAI API.
-
-#### Example (cURL)
-
-```bash
-curl -N -H "Accept: text/event-stream" -H "Content-Type: application/json" \
-  -d '{"query": "latest AI research"}' \
-  http://localhost:8000/tools/web_search_tool
-```
-
-#### Streamed Response Format
-
-Each event contains a JSON object with a partial or final result:
-
-```
-data: {"success": true, "result": "Partial or final result text..."}
-```
-
-The stream ends when the full result is delivered.
-
-> **Note:** All completions and streaming are handled via the OpenAI Python SDK, ensuring robust and efficient streaming support. The `streamable-http` transport is now the standard; SSE is deprecated.
-
-## Connecting Roo/aiGI or MCP Clients
-
-This server is fully compatible with Roo/aiGI and other Model Context Protocol (MCP) clients. To connect a client agent and access the web search tool, follow these instructions:
-
-### Endpoint URL
-
-- **Base URL:** `http://localhost:8000`
-- **MCP Tool Endpoint:** `/tools/web_search_tool`
-
-### Protocol
-
-- **HTTP/1.1** for standard requests
-- **Streaming** for real-time responses (set `Accept: text/event-stream` header)
-
-### Authentication
-
-- No authentication is required for MCP clients to connect to this server. The OpenAI API key is managed server-side via environment variables and is never exposed to clients.
-
-### Example: Connecting a Roo/aiGI Agent
-
-To add this MCP server as a tool provider in Roo/aiGI, use the following configuration (replace the URL if running on a different host/port):
-
-```json
-{
-  "mcp_servers": [
-    {
-      "name": "fastmcp-web-search",
-      "url": "http://localhost:8000"
-    }
-  ]
-}
-```
-
-Or, in Python code (using a generic MCP client):
+The following Python code demonstrates how to use the above configuration to connect to the MCP service and perform a "search" operation using roo code principles. This example uses the `requests` library to send a search request to the MCP endpoint.
 
 ```python
-from mcp_client import MCPClient
+import requests
+import json
 
-client = MCPClient("http://localhost:8000")
-result = client.use_tool("web_search_tool", {"query": "What is the Model Context Protocol?"})
-print(result)
+# MCP service configuration for gpt-4o-search
+mcp_config = {
+    "url": "http://link-to-where-service-is-hosted:8000/sse",
+    "transport": "http",
+    "alwaysAllow": ["search"],
+    "timeout": 300
+}
+
+def mcp_search(query):
+    """
+    Connects to the MCP service and performs a 'search' operation.
+    Args:
+        query (str): The search query string.
+    Returns:
+        dict: The search results from the MCP service.
+    """
+    # Prepare the request payload
+    payload = {
+        "operation": "search",
+        "query": query
+    }
+    # Send the request to the MCP service
+    response = requests.post(
+        mcp_config["url"],
+        data=json.dumps(payload),
+        headers={"Content-Type": "application/json"},
+        timeout=mcp_config["timeout"]
+    )
+    response.raise_for_status()
+    return response.json()
+
+# Example usage
+if __name__ == "__main__":
+    result = mcp_search("What is Model Context Protocol?")
+    print("Search result:", result)
 ```
 
-### Required Headers
+### Explanation
 
-- For standard requests: `Content-Type: application/json`
-- For streaming: add `Accept: text/event-stream`
+- **mcp_config**: Contains the MCP service connection details as shown in the configuration block.
+- **mcp_search(query)**: Defines a function to send a search request to the MCP service. It constructs the payload, sends a POST request, and returns the JSON response.
+- **requests.post(...)**: Sends the search operation to the MCP endpoint using the provided configuration.
+- **Example usage**: Demonstrates how to call the `mcp_search` function and print the result.
 
+---
 
-- [Roo/aiGI Documentation](https://github.com/aigi-ai/aigi)
-- [Model Context Protocol (MCP) Specification](https://github.com/aigi-ai/model-context-protocol)
-- [FastMCP Documentation](https://github.com/aigi-ai/fastmcp)
+# Notes
 
-> **Note:** Ensure the MCP client and this server are on the same network or that the server is accessible from the client environment.
-
-### Roo/aiGI MCP Integration via `streamable-http`
-
-To connect Roo/aiGI (or any aiGI-compatible agent) to this MCP server using the recommended `streamable-http` transport, add the following to your aiGI configuration (e.g., in `aigi.yaml` or your agent's config file):
-
-```yaml
-mcp:
-  transport: streamable-http
-  endpoint: http://localhost:8000/mcp
-  # headers:
-  #   Authorization: "Bearer <YOUR_TOKEN>"
-```
-
-- Set `endpoint` to the MCP server's `/mcp` endpoint (adjust host/port as needed).
-- Uncomment and set the `Authorization` header if your deployment requires authentication.
-- The `streamable-http` transport is recommended for all modern aiGI and Roo deployments.
-
-#### Best Practices & References
-
-- Always use the `streamable-http` transport for new deployments; SSE is deprecated.
-- Ensure the MCP server is accessible from your agent's environment (network/firewall).
-- Keep your aiGI and MCP server versions up to date for best compatibility.
-- For advanced configuration, see:
-  - [Official MCP Documentation](https://github.com/aigi-ai/model-context-protocol)
-  - [streamable-http Transport Reference](https://github.com/aigi-ai/model-context-protocol/blob/main/docs/streamable-http.md)
-  - [Roo/aiGI Integration Guide](https://github.com/aigi-ai/aigi)
-
-## Testing
-## Testing
-
-Run the test suite with:
-
-```bash
-pytest
-```
-
-To check test coverage:
-
-```bash
-pytest --cov=mcp_server --cov-report=term-missing
-```
-
-- The enhanced test suite covers valid/invalid queries, error handling, streaming behavior, and security (API key never exposed).
-- Coverage is ≥90% for all major code paths, including streaming and error scenarios.
-
-## Security Notes
-
-- The OpenAI API key is loaded from the environment and never exposed to clients or logs.
-- Do not commit your real API key to source control.
-- The Docker container runs as a non-root user.
-- All dependencies are pinned to specific versions to reduce supply chain risk.
-- The server validates all input and handles errors gracefully to prevent information leakage.
-
-## License
-
-MIT
+- Only perform the work outlined above and do not deviate from these instructions.
+- For further details, refer to the individual files and comments within the codebase.

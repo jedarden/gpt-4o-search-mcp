@@ -1,12 +1,2 @@
-# Requirements for FastMCP Web Search MCP Server
-# All dependencies are pinned for security and reproducibility.
-
-fastapi==0.110.2
-uvicorn==0.29.0
-httpx==0.27.0
-pytest==8.2.0
-python-dotenv==1.0.1
-openai
 fastmcp
-
-# fastmcp is not a public PyPI package; ensure it is available locally or via your organization.
+openai
