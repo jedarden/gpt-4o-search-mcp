@@ -1,0 +1,116 @@
+# GitHub Actions workflow to build and publish Docker image to GitHub Container Registry (ghcr.io)
+# References:
+# - https://docs.github.com/en/actions/publishing-packages/publishing-docker-images
+# - https://github.com/docker/metadata-action
+# - https://github.com/aquasecurity/trivy-action
+# - https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
+
+name: Build & Publish Docker image
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Generate Docker image tags and labels using docker/metadata-action
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+
+      # Set up Docker Buildx (for multi-platform builds and cache)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Log in to GitHub Container Registry (ghcr.io) using GITHUB_TOKEN
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # Optionally scan the image for vulnerabilities using Trivy
+      - name: Scan image for vulnerabilities (Trivy)
+        uses: aquasecurity/trivy-action@v0.19.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}:latest
+        continue-on-error: true # Do not fail the workflow on vulnerabilities
+
+      # Set image visibility to public using GitHub CLI (gh)
+      # References:
+      # - https://docs.github.com/en/rest/packages/packages?apiVersion=2022-11-28#update-a-package-visibility-for-a-user
+      # - https://docs.github.com/en/rest/packages/packages?apiVersion=2022-11-28#update-a-package-visibility-for-an-organization
+      # - https://cli.github.com/manual/gh_auth_login
+      - name: Set container image visibility to public on GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          # Install GitHub CLI if not present
+          if ! command -v gh &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y gh
+          fi
+
+          # Authenticate gh CLI with GITHUB_TOKEN
+          echo "${GH_TOKEN}" | gh auth login --with-token
+
+          # The package name for GHCR is always lowercase
+          PACKAGE_NAME=$(echo "${REPO}" | tr '[:upper:]' '[:lower:]')
+
+          # Try as organization first, then as user if that fails
+          set_public_org() {
+            gh api \
+              --method PATCH \
+              -H "Accept: application/vnd.github+json" \
+              "/orgs/${OWNER}/packages/container/${PACKAGE_NAME}/visibility" \
+              -f visibility="public" \
+              --silent
+          }
+
+          set_public_user() {
+            gh api \
+              --method PATCH \
+              -H "Accept: application/vnd.github+json" \
+              "/users/${OWNER}/packages/container/${PACKAGE_NAME}/visibility" \
+              -f visibility="public" \
+              --silent
+          }
+
+          if ! set_public_org; then
+            set_public_user
+          fi
+
+          echo "Set GHCR image visibility to public for ghcr.io/${OWNER}/${PACKAGE_NAME}"

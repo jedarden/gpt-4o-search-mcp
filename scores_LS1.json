@@ -1,0 +1,101 @@
+{
+  "layer": "LS1",
+  "timestamp": "2025-05-21T02:18:55Z",
+  "aggregate_scores": {
+    "overall": 32.0,
+    "complexity": 90.0,
+    "coverage": 0.0,
+    "performance": 30.0,
+    "correctness": 20.0,
+    "security": 25.0
+  },
+  "delta": {
+    "overall": 0.0,
+    "complexity": 0.0,
+    "coverage": 0.0,
+    "performance": 0.0,
+    "correctness": 0.0,
+    "security": 0.0
+  },
+  "thresholds": {
+    "epsilon": 3.0,
+    "complexity_max": 15,
+    "coverage_min": 80,
+    "performance_target": 85
+  },
+  "decision": "continue_reflection",
+  "detailed_metrics": {
+    "mcp_server/__init__.py": {
+      "id": "LS1_1",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 100, "resource_usage": 100, "scalability": 100 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 100, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 100, "input_validation": 0, "secure_coding_practices": 0 }
+    },
+    "mcp_server/main.py": {
+      "id": "LS1_2",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 100, "resource_usage": 100, "scalability": 100 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 100, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 100, "input_validation": 0, "secure_coding_practices": 0 }
+    },
+    "mcp_server/tools.py": {
+      "id": "LS1_3",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 0, "resource_usage": 100, "scalability": 100 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 0, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 50, "input_validation": 0, "secure_coding_practices": 0 }
+    },
+    "mcp_server/openai_client.py": {
+      "id": "LS1_4",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 0, "resource_usage": 100, "scalability": 100 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 0, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 50, "input_validation": 0, "secure_coding_practices": 0 }
+    },
+    "mcp_server/config.py": {
+      "id": "LS1_5",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 100, "resource_usage": 100, "scalability": 100 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 100, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 80, "input_validation": 0, "secure_coding_practices": 0 }
+    },
+    "tests/test_web_search.py": {
+      "id": "LS1_6",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 100, "resource_usage": 100, "scalability": 100 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 0, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 100, "input_validation": 0, "secure_coding_practices": 0 }
+    },
+    "Dockerfile": {
+      "id": "LS1_7",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 0, "resource_usage": 50, "scalability": 50 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 50, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 0, "input_validation": 0, "secure_coding_practices": 0 }
+    },
+    "requirements.txt": {
+      "id": "LS1_8",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 100, "resource_usage": 100, "scalability": 100 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 100, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 0, "input_validation": 0, "secure_coding_practices": 0 }
+    },
+    "README.md": {
+      "id": "LS1_9",
+      "complexity": { "cyclomatic": 1, "cognitive": 1, "maintainability_index": 100 },
+      "coverage": { "estimated_line": 0, "estimated_branch": 0, "testability_score": 0 },
+      "performance": { "algorithm_efficiency": 100, "resource_usage": 100, "scalability": 100 },
+      "correctness": { "syntax_validity": 100, "logic_consistency": 0, "edge_case_handling": 0 },
+      "security": { "vulnerability_score": 50, "input_validation": 0, "secure_coding_practices": 0 }
+    }
+  }
+}
